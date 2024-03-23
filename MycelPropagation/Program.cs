@@ -140,6 +140,9 @@ public class Debug
 		}
 		mycel.DebugSavePropagationMap("../../../prMap.png");
 		mycel.DebugSavePropagationGIF("../../../prGrow.gif");
+		
+		mycel.obstacleMap.Transparent().SaveAsPng("../../../ob.png");
+		mycel.GetPropagation(300).Transparent().SaveAsPng("../../../pr.png");
 	}
 }
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Dynamic;
 using System.Numerics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -31,6 +32,8 @@ public class MycelObstacle
 /// </summary>
 public enum Circularity
 {
+	/// <summary> Do not generate propagation map </summary>
+	NONE,
 	/// <summary> 4 operations per pixel </summary>
 	DIAMOND,
 	/// <summary> 8 operations per pixel </summary>
@@ -105,9 +108,9 @@ public class MycelPropagationMap
 {
 	/// <summary> Height and width, in pixels, of the MycelPropagation map and atlases <summary>
 	private int mapSize;
-	private Image<L16> obstacleMap;
+	public Image<L16> obstacleMap {private set; get;}
 	private Image<L16>? propagationMap = null;
-	private ushort maxPropagationValue = 0;
+	public ushort maxPropagationValue {private set; get;}
 	
 	/// <summary>
 	/// Creates a new MycelPropagationMap
@@ -130,6 +133,8 @@ public class MycelPropagationMap
 	
 	public void GeneratePropagationMap(int MaxIterations = 1000000, Circularity circularity = Circularity.SQUARE)
 	{
+		if (circularity == Circularity.NONE) return;
+		
 		var sw = Stopwatch.StartNew();
 		var front = new PixelFrontier();
 		var map = new Image<L16>(mapSize, mapSize, new L16(65535));
@@ -238,12 +243,11 @@ public class MycelPropagationMap
 		L16 upper = new(0);
 		L16 lower = new(65535);	
 		Vector4 upperVec4 = upper.ToVector4();
-		Vector4 lowerVec4 = lower.ToVector4();	
+		Vector4 lowerVec4 = lower.ToVector4();
 		
-		//return propagationMap!.Clone(x => x.BinaryThreshold(threshold, upper, lower));  //This doesn't work since binarisation converts it to L8 >: (
+		//return propagationMap!.Clone(x => x.BinaryThreshold(threshold, upper, lower));  //This doesn't work since binarisation converts it to L8 in the process >: (
 		return propagationMap!.Clone( x => x.ProcessPixelRowsAsVector4(row =>
 		{
-
 			for (int x = 0; x < row.Length; x++)
 			{
 				L16 lumi = new();
@@ -294,3 +298,33 @@ public class MycelPropagationMap
 	}
 }
 
+public static class Exten
+{
+	/// <summary>
+	/// Converts an image to a png encoded <c>byte[]</c>
+	/// </summary>
+	public static byte[] AsPNGBytes(this Image image)
+	{
+		using var ms = new MemoryStream();
+		image.SaveAsPng(ms);
+		return ms.ToArray();
+	}
+	
+	/// <summary>
+	/// Converts an L16 image to transparancy.
+	/// </summary>
+	public static Image<La32> Transparent (this Image<L16> image)
+	{
+		return image.CloneAs<La32>().Clone(x => x.ProcessPixelRowsAsVector4(row =>
+		{
+			for (int x = 0; x < row.Length; x++)
+			{
+				La32 lumi = new();
+				lumi.FromScaledVector4(row[x]);
+				lumi.A = lumi.L;
+				lumi.L = 65535;
+				row[x] = lumi.ToVector4();
+			}
+		}));
+	}
+}
