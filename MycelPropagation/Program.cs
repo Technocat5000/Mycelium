@@ -41,10 +41,10 @@ public class Debug
 								attenuation: 0.75f,
 								points: new PointF[]
 								{
-									new(350, 360),
-									new(475, 340),
-									new(475, 460),
-									new(350, 480)
+									new(350, 320),
+									new(475, 300),
+									new(475, 420),
+									new(350, 440)
 								}),
 							new(
 								attenuation: 0.5f,

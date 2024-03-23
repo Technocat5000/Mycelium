@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using System.Dynamic;
 using System.Numerics;
+using System.Xml.Schema;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Gif;
@@ -122,13 +122,20 @@ public class MycelPropagationMap
 		this.mapSize = mapSize;
 		obstacleMap = new(mapSize, mapSize);
 		
-		foreach (var obstacle in obstacles)
-		{
-			obstacleMap.Mutate(x => x.FillPolygon(new Color(new L16((ushort)(65535 * obstacle.attenuation))), obstacle.points));
-		}
+		GenerateObstacleMap(obstacles);
 		
 		Console.WriteLine("generating prop map");
 		Task.Run(() => GeneratePropagationMap(1000000, FirstPassCircularity));
+	}
+	
+	public void GenerateObstacleMap(MycelObstacle[] obstacles)
+	{
+		foreach (var obstacle in obstacles)
+		{
+			var polygon = new Image<L16>(mapSize, mapSize);
+			polygon.Mutate(x => x.FillPolygon(new Color(new L16((ushort)(65535 * obstacle.attenuation))), obstacle.points));
+			obstacleMap.Mutate(x => x.DrawImage(polygon, PixelColorBlendingMode.Lighten, 1f));
+		}
 	}
 	
 	public void GeneratePropagationMap(int MaxIterations = 1000000, Circularity circularity = Circularity.SQUARE)
