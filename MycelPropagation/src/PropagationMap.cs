@@ -27,7 +27,7 @@ public class MycelObstacle
 }
 
 /// <summary>
-/// Determines the shape used to grow the frontier. More complex shapes result in a more circular propagation, at the cost of performance.
+/// Determines the shape used to grow the frontier. More complex shapes result in a more round propagation, at the cost of performance.
 /// </summary>
 public enum Circularity
 {
@@ -38,7 +38,7 @@ public enum Circularity
 	/// <summary> 16 operations per pixel </summary>
 	OCTOTHORPE,
 	/// <summary> 32 operations per pixel </summary>
-	PRIMEGRID
+	OCTOPRIME
 }
 
 class PixelFrontier
@@ -101,7 +101,7 @@ class PixelFrontier
 	}
 }
 
-class MycelPropagationMap
+public class MycelPropagationMap
 {
 	/// <summary> Height and width, in pixels, of the MycelPropagation map and atlases <summary>
 	private int mapSize;
@@ -114,7 +114,7 @@ class MycelPropagationMap
 	/// </summary>
 	/// <param name="mapSize"> Height and width, in pixels, of the MycelPropagation map and atlases </param>
 	/// <param name="FirstPassCircularity"> Circularity type to use for the initial propagation map generation </param>
-	public MycelPropagationMap(int mapSize, MycelObstacle[] obstacles, Circularity FirstPassCircularity = Circularity.DIAMOND)
+	public MycelPropagationMap(int mapSize, MycelObstacle[] obstacles, Circularity FirstPassCircularity = Circularity.SQUARE)
 	{
 		this.mapSize = mapSize;
 		obstacleMap = new(mapSize, mapSize);
@@ -128,7 +128,7 @@ class MycelPropagationMap
 		Task.Run(() => GeneratePropagationMap(1000000, FirstPassCircularity));
 	}
 	
-	public void GeneratePropagationMap(int MaxIterations = 1000000, Circularity circularity = Circularity.DIAMOND)
+	public void GeneratePropagationMap(int MaxIterations = 1000000, Circularity circularity = Circularity.SQUARE)
 	{
 		var sw = Stopwatch.StartNew();
 		var front = new PixelFrontier();
@@ -213,7 +213,7 @@ class MycelPropagationMap
 					AddToFrontier(value, 22, (X - 2, Y + 1));
 					break;
 				default:
-					throw new NotImplementedException();
+					throw new NotImplementedException(circularity.ToString());
 			}
 			
 			try

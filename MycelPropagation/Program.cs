@@ -1,13 +1,8 @@
 ﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Drawing;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.ColorSpaces;
 
-using MycelPropagation;
+namespace MycelPropagation;
 
-class Debug
+public class Debug
 {
 	public static void Main()
 	{			
